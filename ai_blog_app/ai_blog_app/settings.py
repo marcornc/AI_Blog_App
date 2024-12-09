@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8leddgc+eyap6k$p0%e#t+ml9*rxk@rtw6lv%wr=c_4b2#n3kx'
+SECRET_KEY = 'django-insecure-4tx^o(3r8mn)kt-ldl3s1u8!j75^fz$kblqk87o29$iqx9*clq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'blog_generator',
 ]
 
 MIDDLEWARE = [
@@ -51,10 +52,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ai_blog_app.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # when a user try to render a templats file do the the base directory (BASE_DIR) nad go to the folder templats and look for a specific html file
+        'DIRS': [BASE_DIR,'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,10 +77,19 @@ WSGI_APPLICATION = 'ai_blog_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+#install psycopg2-binary to be able to use postres db
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('NAME_DB'), # initial database name ( different from the db instance!!)
+        'USER': os.environ.get('MASTER_USER'), # master username
+        'PASSWORD': os.environ.get('PASSWORD_DB'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': '5432',
     }
 }
 
@@ -121,3 +134,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login'
