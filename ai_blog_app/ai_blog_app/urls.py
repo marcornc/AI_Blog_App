@@ -19,5 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # tryes to go to the home page, goes to the file urls into blog_genrator and execute
     path('', include('blog_generator.urls'))
 ]
