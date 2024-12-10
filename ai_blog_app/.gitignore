@@ -3,3 +3,7 @@
 
 # local virtual enviroment
 .venv
+
+.vs
+
+media
