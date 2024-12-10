@@ -2,4 +2,4 @@
 .env
 
 # local virtual enviroment
-/ai_blog_venv
+.venv
