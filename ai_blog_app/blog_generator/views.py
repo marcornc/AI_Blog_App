@@ -16,6 +16,7 @@ import os
 import assemblyai as aai
 import yt_dlp
 import openai
+from .models import BlogPost
 
 
 # Create your views here.
@@ -90,30 +91,39 @@ def generate_blog(request):
             return JsonResponse({'error':'Faild to generate blg article'}, status=500)
 
         # save blog article to database
+        new_blog_article = BlogPost.objects.create(
+                user = request.user,
+                youtube_title = yt_title,
+                youtube_link = yt_link,
+                generated_content = blog_content,
+        )
 
-        # return blog aricle sa response
+        # return blog aricle as response
         return JsonResponse({'content':blog_content})
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    
-
-
 def get_yt_title(link):
     try:
-        yt = YouTube(link)
-        return yt.title
-    except KeyError:
-        return "Title unavailable"
-    except PytubeError as e:
+        ydl_opts = {
+            'quiet': True,  # Suppresses verbose output
+            'no_warnings': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(link, download=False)  # Extract video info without downloading
+            return info.get('title', 'Title unavailable')  # Safely fetch the title
+    except yt_dlp.utils.DownloadError as e:
         return f"Error fetching title: {e}"
+    except Exception as e:
+        return f"An unexpected error occurred: {e}"
 
 def get_yt_transcript(link):
     audio_file = download_audio(link)
     aai.settings.api_key = os.environ.get('AAI_KEY')
     transcriber = aai.Transcriber()
     transcript = transcriber.transcribe(audio_file)
+    
     return transcript.text
 
 def download_audio(link):
@@ -128,24 +138,31 @@ def download_audio(link):
 
 
 def generate_blog_from_transcription(transcription): 
+
+    # limitate lenght of the trascription dude the limitation of the free GooseAI model Fairseq 1.3B at 2048
+    def limit_transcription_size(text, max_tokens):
+        words = text.split()  # Split by words (approximation of tokens)
+        if len(words) > max_tokens:
+            return " ".join(words[:max_tokens])  # Trim to max_tokens words
+        return text
+
+    transcription = limit_transcription_size(transcription, 1500)
+    
     openai.api_base = "https://api.goose.ai/v1"
     openai.api_key = os.environ.get("GOOSEAI_KEY")
 
     # Create the blog post prompt
     prompt = (
-        f"Based on the following transcript from a YouTube video, write a comprehensive blog article. "
-        f"Make it look like a proper blog article rather than a transcript:\n\n{transcription}\n\nBlog Article:"
+        f"Summarise the following text, \n\n{transcription}\n\n, "
     )
 
     # Generate completion using the fairseq-1.3b engine
     try:
         completion = openai.Completion.create(
-            engine="fairseq-1-3b",  # Use the Fairseq 1.3B engine
-            prompt=prompt,
-            max_tokens=500,        # Adjust the token limit as needed
-            temperature=0.7,       # Controls randomness (higher = more creative, lower = more focused)
-            top_p=0.9,             # Nucleus sampling
-            stream=False           # Disable streaming for simplicity
+            engine="gpt-j-6b",
+            prompt= prompt,
+            max_tokens=200,
+            stream=False
         )
 
         # Extract and return the generated content
@@ -156,7 +173,8 @@ def generate_blog_from_transcription(transcription):
         print(f"Error generating blog: {e}")
         return None
 
-    
+def blog_list(request):
+    return render(request,'all-blogs.html')
 
 
 
