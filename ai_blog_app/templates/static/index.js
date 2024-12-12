@@ -1,3 +1,5 @@
+//script for the button generate blog
+
 document
   .getElementById("generateBlogButton")
   .addEventListener("click", async () => {

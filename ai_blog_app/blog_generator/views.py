@@ -97,6 +97,7 @@ def generate_blog(request):
                 youtube_link = yt_link,
                 generated_content = blog_content,
         )
+        new_blog_article.save()
 
         # return blog aricle as response
         return JsonResponse({'content':blog_content})
@@ -153,8 +154,8 @@ def generate_blog_from_transcription(transcription):
 
     # Create the blog post prompt
     prompt = (
-        f"Summarise the following text, \n\n{transcription}\n\n, "
-    )
+    f"Summarize the following text into a concise and coherent paragraph, capturing the main ideas and key details:\n\n{transcription}\n\nSummary:"
+)
 
     # Generate completion using the fairseq-1.3b engine
     try:
@@ -174,9 +175,14 @@ def generate_blog_from_transcription(transcription):
         return None
 
 def blog_list(request):
-    return render(request,'all-blogs.html')
+    blog_articles = BlogPost.objects.filter(user=request.user)
+    return render(request,'pages/all-blogs.html', {'blog_articles': blog_articles})
 
-
-
+def blog_details(request, pk):
+    blog_article_detail = BlogPost.objects.get(id=pk)
+    if request.user == blog_article_detail.user:
+        return render(request, 'pages/blog-details.html', {'blog_article_detail' : blog_article_detail})
+    else:
+        return redirect('/')
 
 
