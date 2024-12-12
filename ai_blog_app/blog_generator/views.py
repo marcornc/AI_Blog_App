@@ -1,3 +1,4 @@
+import shutil
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
@@ -20,10 +21,13 @@ from .models import BlogPost
 
 
 # Create your views here.
+
+
 @login_required # just how is logged in can access this page
 def index(request):
     return render(request, 'index.html')
 
+## Functions for handling login logout and signin
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -67,6 +71,7 @@ def user_logout(request):
     logout(request)
     return redirect('/')
 
+
 @csrf_exempt
 def generate_blog(request):
     if request.method == 'POST':
@@ -99,12 +104,22 @@ def generate_blog(request):
         )
         new_blog_article.save()
 
+
+            # Delete the entire media folder
+        media_folder_path = os.path.join(settings.BASE_DIR, "media")
+        if os.path.exists(media_folder_path):
+            shutil.rmtree(media_folder_path)  # Deletes the folder and all its contents
+            print(f"Media folder deleted: {media_folder_path}")
+        else:
+            print(f"Media folder not found: {media_folder_path}")
+
         # return blog aricle as response
         return JsonResponse({'content':blog_content})
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+## Functions needed for the generate_blog
 def get_yt_title(link):
     try:
         ydl_opts = {
@@ -137,7 +152,6 @@ def download_audio(link):
         info_dict = ydl.extract_info(link, download=True)
         return ydl.prepare_filename(info_dict)
 
-
 def generate_blog_from_transcription(transcription): 
 
     # limitate lenght of the trascription dude the limitation of the free GooseAI model Fairseq 1.3B at 2048
@@ -154,7 +168,7 @@ def generate_blog_from_transcription(transcription):
 
     # Create the blog post prompt
     prompt = (
-    f"Summarize the following text into a concise and coherent paragraph, capturing the main ideas and key details:\n\n{transcription}\n\nSummary:"
+    f"Summarize the following text:\n\n{transcription}\n\nSummary:"
 )
 
     # Generate completion using the fairseq-1.3b engine
@@ -174,6 +188,8 @@ def generate_blog_from_transcription(transcription):
         print(f"Error generating blog: {e}")
         return None
 
+
+## Function to see all generated posts
 def blog_list(request):
     blog_articles = BlogPost.objects.filter(user=request.user)
     return render(request,'pages/all-blogs.html', {'blog_articles': blog_articles})
