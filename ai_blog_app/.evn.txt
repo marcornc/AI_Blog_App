@@ -1,0 +1,7 @@
+NAME_DB = name of the DB
+MASTER_USER = name superuser 
+PASSWORD_DB = DB password
+DB_HOST = DB host
+SECRET_KEY = Django secret key
+AAI_KEY = key fro assemblyai
+GOOSEAI_KEY = key for GooseAI
