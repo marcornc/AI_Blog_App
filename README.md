@@ -2,6 +2,10 @@
 
 A Python-Django application that allows users to summarize YouTube videos by generating concise scripts from their transcripts. The app integrates audio download, transcription, and AI-based summarization, and stores the results in a database.
 
+
+https://github.com/user-attachments/assets/f744a281-ffad-43ae-9912-ab45fd63a31f
+
+
 ---
 
 ## Features
