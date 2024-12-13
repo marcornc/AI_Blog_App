@@ -33,6 +33,64 @@ A Python-Django application that allows users to summarize YouTube videos by gen
 
 
 
+## Prerequisites
+
+Before running the application, ensure you have the following:
+
+- Python 3.8+
+- Django 4.x
+- PostgreSQL Database (AWS-hosted or local)
+- API Keys:
+   - AssemblyAI API key for transcription services.
+   - GooseAI API key for summarization.
+
+
+## Installation and Setup
+
+1. **Clone the Repository**
+```
+git clone https://github.com/marcornc/AI_Blog_App.git
+cd AI_Blog_App
+```
+
+2. **Set Up a Virtual Environment**
+```
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+3. **Install Dependencies**
+```
+pip install -r requirements.txt
+```
+
+4. **Configure the Environment**
+- Create a .env file in the project root with the following keys:
+
+   - NAME_DB = name of the DB
+   - MASTER_USER = name superuser 
+   - PASSWORD_DB = DB password
+   - DB_HOST = DB host
+   - SECRET_KEY = Django secret key
+   - AAI_KEY = key for assemblyai
+   - GOOSEAI_KEY = key for GooseAI
+
+5. **Set Up the Database**
+Apply migrations to set up the PostgreSQL database:
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
+6. **Run the Development Server**
+```
+python manage.py runserver
+```
+
+Visit http://127.0.0.1:8000/ in your browser.
+
+
+
 ## Usage
 
 1. **Sign Up or Log In**
