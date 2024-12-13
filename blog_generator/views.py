@@ -86,6 +86,13 @@ def generate_blog(request):
         # get transcript
         yt_transcript = get_yt_transcript(yt_link)
         if not yt_transcript:
+            # Delete the entire media folder
+            media_folder_path = os.path.join(settings.BASE_DIR, "media")
+            if os.path.exists(media_folder_path):
+                shutil.rmtree(media_folder_path)  # Deletes the folder and all its contents
+                print(f"Media folder deleted: {media_folder_path}")
+            else:
+                print(f"Media folder not found: {media_folder_path}")
             return JsonResponse({'error': 'Faild to get transcript'}, status=500)
         
         # use OpenAI to generate the blog
